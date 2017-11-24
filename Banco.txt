@@ -1,0 +1,150 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+CREATE SCHEMA IF NOT EXISTS `Estac` DEFAULT CHARACTER SET utf8 ;
+USE `Estac` ;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`ENDERECO` (
+  `enderecoID` INT GENERATED ALWAYS AS (NOT NULL),
+  `enderecoCEP` VARCHAR(10) NULL,
+  `enderecoCidade` VARCHAR(45) NULL,
+  `enderecoBairro` VARCHAR(45) NULL,
+  `enderecoRua` VARCHAR(45) NULL,
+  `enderecoComplemento` VARCHAR(45) NULL,
+  PRIMARY KEY (`enderecoID`))
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`CLIENTE` (
+  `clienteID` INT GENERATED ALWAYS AS (NOT NULL) VIRTUAL,
+  `clienteNome` VARCHAR(45) NULL,
+  `clienteSobrenome` VARCHAR(45) NULL,
+  `clienteCPF` VARCHAR(14) NULL,
+  `clienteEmail` VARCHAR(45) NULL,
+  `clienteTelefone` VARCHAR(15) NULL,
+  `clienteEndereco` INT NULL,
+  PRIMARY KEY (`clienteID`),
+  UNIQUE INDEX `clienteEmail_UNIQUE` (`clienteEmail` ASC),
+  UNIQUE INDEX `clienteCPF_UNIQUE` (`clienteCPF` ASC),
+  UNIQUE INDEX `clienteTelefone_UNIQUE` (`clienteTelefone` ASC),
+  INDEX `CLIENTE_ENDERECO_FK_idx` (`clienteEndereco` ASC),
+  CONSTRAINT `CLIENTE_ENDERECO_FK`
+    FOREIGN KEY (`clienteEndereco`)
+    REFERENCES `Estac`.`ENDERECO` (`enderecoID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`FUNCIONARIO` (
+  `funcionarioID` INT GENERATED ALWAYS AS (NOT NULL),
+  `funcionarioNome` VARCHAR(45) NULL,
+  `funcionarioSobrenome` VARCHAR(45) NULL,
+  `funcionarioCPF` VARCHAR(14) NULL,
+  `funcionarioTelefone` VARCHAR(15) NULL,
+  `funcionarioEmail` VARCHAR(45) NULL,
+  `funcionarioCargo` VARCHAR(45) NULL,
+  `funcionarioSalario` VARCHAR(45) NULL,
+  `funcionarioLogin` VARCHAR(45) NULL,
+  `funcionarioSenha` VARCHAR(45) NULL,
+  `funcionarioComissao` VARCHAR(45) NULL,
+  `funcionarioEndereco` INT NULL,
+  PRIMARY KEY (`funcionarioID`),
+  UNIQUE INDEX `funcionarioCPF_UNIQUE` (`funcionarioCPF` ASC),
+  UNIQUE INDEX `funcionarioTelefone_UNIQUE` (`funcionarioTelefone` ASC),
+  UNIQUE INDEX `funcionarioCargo_UNIQUE` (`funcionarioCargo` ASC),
+  UNIQUE INDEX `funcionarioLogin_UNIQUE` (`funcionarioLogin` ASC),
+  INDEX `FUNCIONARIO_ENDERECO_FK_idx` (`funcionarioEndereco` ASC),
+  CONSTRAINT `FUNCIONARIO_ENDERECO_FK`
+    FOREIGN KEY (`funcionarioEndereco`)
+    REFERENCES `Estac`.`ENDERECO` (`enderecoID`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`VEICULO` (
+  `veiculoPlaca` INT NOT NULL,
+  `veiculoModelo`  VARCHAR(45) NULL,
+  `veiculoMarca`  VARCHAR(45) NULL,
+  `veiculoCor`  VARCHAR(45) NULL,
+  `veiculoAno`  INT NOT NULL,
+  `veiculoDono` INT NOT NULL,
+  PRIMARY KEY (`veiculoPlaca`),
+  INDEX `VEICULO_COR_idx` (`veiculoCor` ASC),
+  INDEX `VEICULO_MODELO_idx` (`veiculoModelo` ASC),
+  INDEX `VEICULO_MARCA_idx` (`veiculoMarca` ASC),
+  INDEX `VEICULO_DONO_FK_idx` (`veiculoCliente` ASC),
+    FOREIGN KEY (`autoDono`)
+    REFERENCES `Estac`.`CLIENTE` (`clienteID`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`MOTOCICLETA` (
+  `motoPlaca` INT NOT NULL,
+  `motoModelo`  VARCHAR(45) NULL,
+  `motoMarca`  VARCHAR(45) NULL,
+  `motoCor`  VARCHAR(45) NULL,
+  `motoAno`  INT NOT NULL,
+  `motoDono` INT NOT NULL,
+  PRIMARY KEY (`motoPlaca`),
+  INDEX `MOTO_MODELO_idx` (`motoModelo` ASC),
+  INDEX `MOTO_COR_idx` (`motoCor` ASC),
+  INDEX `MOTO_COR_idx` (`motoCor` ASC),
+  INDEX `MOTO_DONO_FK_idx` (`motoDono` ASC),
+  CONSTRAINT `MOTO_DONO_FK`
+    FOREIGN KEY (`motoDono`)
+    REFERENCES `Estac`.`CLIENTE` (`clienteID`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`VAGAPERMANENTE` (
+  `perPlaca` INT NOT NULL,
+  `perNumTotal` INT NOT NULL,
+  `perNumOcu` INT NOT NULL,
+  `perTipo` VARCHAR(45) NULL,
+  `perFuncionario` INT NOT NULL,
+  `perDono` INT NOT NULL,
+  PRIMARY KEY (`perPlaca`),
+  INDEX `PER_NUMTOTAL_idx` (`perNumTotal` ASC),
+  INDEX `PER_NUMOCUP_idx` (`perNumOcu` ASC),
+  INDEX `PER_TIPO_idx` (`perTipo` ASC),
+  INDEX `PER_FUNCIONARIO_FK_idx` (`perFuncionario` ASC),
+  INDEX `PER_DONO_FK_idx` (`perDono` ASC),
+  CONSTRAINT `PER_FUNCIONARIO_FK`
+    FOREIGN KEY (`perFuncionario`)
+    REFERENCES `Estac`.`FUNCIONARIO` (`funcionarioID`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE),
+  CONSTRAINT `PER_DONO_FK`
+    FOREIGN KEY (`perDono`)
+    REFERENCES `Estac`.`CLIENTE` (`clienteID`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+CREATE TABLE IF NOT EXISTS `Estac`.`VAGAROTATIVA` (
+  `rotNumTotal` INT NOT NULL,
+  `rotNumOcu` INT NOT NULL,
+  `rotTipo` VARCHAR(45) NULL,
+  `rotFuncionario`  INT NOT NULL,
+  PRIMARY KEY (`rotPlaca`),
+  INDEX `ROT_NUMTOTAL_idx` (`perNumTotal` ASC),
+  INDEX `ROT_NUMOCUP_idx` (`perNumOcu` ASC),
+  INDEX `ROT_TIPO_idx` (`perTipo` ASC),
+  INDEX `ROT_FUNCIONARIO_FK_idx` (`perFuncionario` ASC),
+  CONSTRAINT `PER_FUNCIONARIO_FK`
+    FOREIGN KEY (`perFuncionario`)
+    REFERENCES `Estac`.`FUNCIONARIO` (`funcionarioID`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+CREATE USER 'funcionario' IDENTIFIED BY 'estacionamento';
+
+GRANT SELECT, INSERT, TRIGGER ON TABLE `Estac`.* TO 'funcionario';
+GRANT SELECT, INSERT, TRIGGER, UPDATE, DELETE ON TABLE `Estac`.* TO 'funcionario';
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
